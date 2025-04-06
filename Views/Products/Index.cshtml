@@ -1,0 +1,57 @@
+﻿@model IEnumerable<SistemaInventario.Models.Product>
+
+@{
+    ViewData["Title"] = "Inventario Filtrado por Categorías";
+}
+
+<h1>Inventario</h1>
+
+<!-- Filtro por categoría -->
+<form method="get" asp-action="Index" asp-controller="Products">
+    <label for="categoryId">Filtrar por Categoría:</label>
+    <select id="categoryId" name="categoryId" onchange="this.form.submit()">
+        <option value="0">-- Todas --</option>
+        @foreach (var cat in ViewBag.Categories)
+        {
+            <option value="@cat.CategoryId">@cat.Name</option>
+        }
+    </select>
+</form>
+
+<!-- Botón o enlace para crear un nuevo producto -->
+<p>
+    <a asp-controller="Products" asp-action="Create" class="btn btn-primary">
+        Crear Nuevo Producto
+    </a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio Compra</th>
+            <th>Precio Venta</th>
+            <th>Fecha Registro</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Category?.Name</td>
+                <td>@item.PurchasePrice</td>
+                <td>@item.SalePrice</td>
+                <td>@item.RegistrationDate.ToShortDateString()</td>
+                <td>@item.Quantity</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.ProductId">Detalles</a> |
+                    <a asp-action="Edit" asp-route-id="@item.ProductId">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ProductId">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

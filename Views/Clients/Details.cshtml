@@ -1,0 +1,84 @@
+﻿@model SistemaInventario.Models.Client
+
+@{
+    ViewData["Title"] = "Detalles del Cliente";
+}
+
+<h1>Detalles del Cliente</h1>
+
+<div>
+    <h4>Información del Cliente</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Phone)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Phone)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address)
+        </dd>
+        <dt class="col-sm-2">
+            Estado de Cuenta
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.OutstandingBalance > 0)
+            {
+                <span class="text-danger">Deudor (Saldo pendiente: @Model.OutstandingBalance.ToString("C"))</span>
+            }
+            else
+            {
+                <span class="text-success">Solvente</span>
+            }
+        </dd>
+    </dl>
+</div>
+
+<h2>Facturas</h2>
+@if (Model.Invoices != null && Model.Invoices.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>N° Factura</th>
+                <th>Fecha</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model.Invoices)
+            {
+                <tr>
+                    <td>@invoice.InvoiceId</td>
+                    <td>@invoice.Date.ToShortDateString()</td>
+                    <td>@invoice.TotalAmount.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No se han registrado compras.</p>
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ClientId">Editar</a> |
+    <a asp-action="Index">Volver a la Lista</a>
+</div>

@@ -1,0 +1,38 @@
+﻿@model SistemaInventario.Models.SalesReportViewModel
+
+@{
+    ViewData["Title"] = "Reporte de Ventas y Ganancias";
+}
+
+<h1>Reporte de Ventas y Ganancias</h1>
+
+<!-- Formulario para seleccionar el rango de fechas -->
+<form method="get" asp-action="SalesReport">
+    <div class="form-group">
+        <label for="startDate">Fecha de Inicio:</label>
+        <input type="date" id="startDate" name="startDate" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="form-group">
+        <label for="endDate">Fecha de Fin:</label>
+        <input type="date" id="endDate" name="endDate" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+    </div>
+    <button type="submit" class="btn btn-primary">Generar Reporte</button>
+</form>
+
+<hr />
+
+<h3>Reporte</h3>
+<p><strong>Rango de Fechas:</strong> @Model.StartDate.ToShortDateString() - @Model.EndDate.ToShortDateString()</p>
+<p><strong>Total de Ventas:</strong> $@Model.TotalSales</p>
+<p><strong>Cantidad de Facturas:</strong> @Model.InvoiceCount</p>
+<p><strong>Ganancia Neta:</strong> $@Model.NetProfit</p>
+
+<!-- Botones de exportación -->
+<p>
+    <a asp-action="ExportToPdf" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" class="btn btn-success">
+        Exportar a PDF
+    </a>
+    @* <a asp-action="ExportToExcel" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" class="btn btn-warning">
+        Exportar a Excel
+    </a> *@
+</p>

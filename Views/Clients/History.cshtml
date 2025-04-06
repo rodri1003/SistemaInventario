@@ -1,0 +1,55 @@
+﻿@using System.Globalization
+@model SistemaInventario.Models.Client
+
+@{
+    ViewData["Title"] = "Historial de Compras";
+    Layout = "_Layout"; // O el layout que uses
+    // Definimos la cultura para El Salvador
+    var svCulture = CultureInfo.CreateSpecificCulture("es-SV");
+}
+
+<h1>Historial de Compras de @Model.Name</h1>
+
+<div>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Teléfono:</strong> @Model.Phone</p>
+    <p><strong>Dirección:</strong> @Model.Address</p>
+    <p>
+        <strong>Estado de Cuenta:</strong> @(Model.OutstandingBalance > 0 ? "Deudor" : "Solvente")
+        <br /><strong>Balance Pendiente:</strong> @Model.OutstandingBalance.ToString("C", svCulture)
+    </p>
+</div>
+
+<h2>Facturas</h2>
+@if (Model.Invoices != null && Model.Invoices.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>N° Factura</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model.Invoices)
+            {
+                <tr>
+                    <td>@invoice.InvoiceId</td>
+                    <td>@invoice.Date.ToShortDateString()</td>
+                    <td>@invoice.TotalAmount.ToString("C", svCulture)</td>
+                    <td>
+                        <a asp-controller="Invoices" asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-info btn-sm">
+                            Ver Detalles
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No se han registrado compras para este cliente.</p>
+}

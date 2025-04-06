@@ -1,0 +1,35 @@
+﻿@model IEnumerable<SistemaInventario.Models.Category>
+
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<h1>Categorías</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Crear nueva Categoría</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th></th> <!-- Columna para las acciones -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CategoryId</td>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.CategoryId">Detalles</a> |
+                    <a asp-action="Edit" asp-route-id="@item.CategoryId">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@item.CategoryId">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,41 @@
+﻿@model IEnumerable<SistemaInventario.Models.Client>
+
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<h1>Información de Clientes</h1>
+
+<p>
+    <a asp-action="Create">Crear Nuevo</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Name)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.Phone)</th>
+            <th>@Html.DisplayNameFor(model => model.Address)</th>
+            <th>@Html.DisplayNameFor(model => model.Notes)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.Address)</td>
+                <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ClientId">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.ClientId">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ClientId">Eliminar</a> |
+                    <a asp-action="History" asp-route-id="@item.ClientId">Historial</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
