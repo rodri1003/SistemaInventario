@@ -20,10 +20,8 @@ namespace SistemaInventario.Controllers
         }
 
         // GET: Products
-        // Permite filtrar productos por categoría (usando un dropdown en la vista)
         public async Task<IActionResult> Index(int? categoryId)
         {
-            // Llenar el dropdown con todas las categorías para el filtro
             ViewBag.Categories = await _context.Categories.ToListAsync();
 
             var productsQuery = _context.Products.Include(p => p.Category).AsQueryable();
@@ -53,7 +51,6 @@ namespace SistemaInventario.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
-            // Llenar el dropdown con las categorías usando "CategoryList" para que se muestre el nombre
             ViewData["CategoryList"] = new SelectList(_context.Categories, "CategoryId", "Name");
             return View();
         }
@@ -69,7 +66,6 @@ namespace SistemaInventario.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            // Si hay error, se recarga la lista para el dropdown
             ViewData["CategoryList"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
             return View(product);
         }
@@ -138,6 +134,17 @@ namespace SistemaInventario.Controllers
             }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // HU10 - Productos con bajo inventario (Cantidad <= 5)
+        public async Task<IActionResult> LowStock()
+        {
+            var lowStockProducts = await _context.Products
+                .Include(p => p.Category)
+                .Where(p => p.Quantity <= 5)
+                .ToListAsync();
+
+            return View(lowStockProducts);
         }
 
         private bool ProductExists(int id)

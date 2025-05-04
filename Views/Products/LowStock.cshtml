@@ -1,0 +1,33 @@
+﻿@model IEnumerable<SistemaInventario.Models.Product>
+
+@{
+    ViewData["Title"] = "Productos con Bajo Inventario";
+}
+
+<h2>Productos con Bajo Inventario</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Cantidad</th>
+            <th>Precio de Compra</th>
+            <th>Precio de Venta</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Category?.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.PurchasePrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                <td>@item.SalePrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Volver a la lista de productos</a>

@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<SistemaInventario.Models.Invoice>
 
 @{
-    ViewData["Title"] = "Lista de Facturas"; // Título en español
+    ViewData["Title"] = "Lista de Facturas"; 
 }
 
 <h1>Lista de Facturas</h1>
 
 <p>
-    <a asp-action="Create">Crear Nuevo</a> <!-- Cambiado a español -->
+    <a asp-action="Create">Crear Nuevo</a> 
 </p>
 
 <table class="table table-bordered">
@@ -18,21 +18,21 @@
             <th>Ganancia Neta</th>
             <th>Descuento Global (%)</th>
             <th>¿Pagado?</th>
-            <th></th> <!-- Para botones de acción -->
+            <th></th> 
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <!-- Ajustar la cultura de la moneda si deseas formatear los valores con es-SV -->
+                
                 <td>@item.Date.ToShortDateString()</td>
                 <td>@item.TotalAmount</td>
                 <td>@item.NetProfit</td>
                 <td>@item.GlobalDiscountPercentage</td>
                 <td>@(item.IsPaid ? "Sí" : "No")</td>
                 <td>
-                    <!-- Botones de acción en español -->
+                    
                     <a asp-action="Edit" asp-route-id="@item.InvoiceId">Editar</a> |
                     <a asp-action="Details" asp-route-id="@item.InvoiceId">Detalles</a> |
                     <a asp-action="Delete" asp-route-id="@item.InvoiceId">Eliminar</a>

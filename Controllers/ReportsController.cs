@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaInventario.Data;
 using SistemaInventario.Models;
-using Rotativa.AspNetCore;            // Para exportar a PDF
-using OfficeOpenXml;                  // Para exportar a Excel
+using Rotativa.AspNetCore;            
+using OfficeOpenXml;                  
 using System.IO;
 
 namespace SistemaInventario.Controllers

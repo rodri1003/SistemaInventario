@@ -20,16 +20,12 @@ namespace SistemaInventario.Models
 
         public string? Address { get; set; }
 
-        // Propiedad para notas o comentarios adicionales del cliente.
         public string? Notes { get; set; }
 
-        // Indica si el cliente tiene deudas pendientes: true = deudor, false = solvente.
         public bool IsDebtor { get; set; }
 
-        // Historial de compras (facturas) asociadas al cliente.
         public List<Invoice> Invoices { get; set; } = new List<Invoice>();
 
-        // Balance pendiente del cliente.
         public decimal OutstandingBalance { get; set; }
     }
 }

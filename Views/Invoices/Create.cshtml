@@ -1,64 +1,128 @@
 ﻿@model SistemaInventario.Models.Invoice
-
 @{
-    ViewData["Title"] = "Crear Factura";
+    ViewData["Title"] = "Crear Factura";
 }
 
-<h1>Crear Factura</h1>
-
-<h4>Factura</h4>
+<h1>Crear Factura</h1>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group">
-                <label asp-for="TotalAmount" class="control-label"></label>
-                <input asp-for="TotalAmount" class="form-control" />
-                <span asp-validation-for="TotalAmount" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="NetProfit" class="control-label"></label>
-                <input asp-for="NetProfit" class="form-control" />
-                <span asp-validation-for="NetProfit" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="GlobalDiscountPercentage" class="control-label"></label>
-                <input asp-for="GlobalDiscountPercentage" class="form-control" />
-                <span asp-validation-for="GlobalDiscountPercentage" class="text-danger"></span>
-            </div>
-
-            <!-- Dropdown para seleccionar si la factura está pagada o no -->
-            <div class="form-group">
-                <label asp-for="IsPaid" class="control-label"></label>
-                <select asp-for="IsPaid" class="form-control">
-                    <option value="true">Sí</option>
-                    <option value="false">No</option>
-                </select>
-                <span asp-validation-for="IsPaid" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Crear" class="btn btn-primary" />
-            </div>
-        </form>
+    <!-- CLIENTE (opcional) -->
+    <div class="form-group">
+        <label for="ClientId">Cliente (opcional)</label>
+        <select asp-for="ClientId" class="form-control" asp-items="ViewBag.Clientes">
+            <option value="">-- Invitado / sin cliente --</option>
+        </select>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Volver a la Lista</a>
-</div>
+    <!-- DESCUENTO GLOBAL -->
+    <div class="form-group">
+        <label asp-for="GlobalDiscountPercentage">Descuento global (%)</label>
+        <input asp-for="GlobalDiscountPercentage" class="form-control" type="number"
+               step="0.01" min="0" max="100" value="0" />
+        <span asp-validation-for="GlobalDiscountPercentage" class="text-danger"></span>
+    </div>
+
+    <!-- ÍTEMS DINÁMICOS -->
+    <h4>Ítems de la factura</h4>
+    <div id="lineItemsContainer">
+        <!-- Ítem inicial (índice 0) -->
+        <div class="lineItem border p-2 mb-2 rounded">
+            <div class="form-row">
+                <div class="col">
+                    <label>Producto</label>
+                    <input name="LineItems[0].ProductName" class="form-control" required />
+                </div>
+                <div class="col-2">
+                    <label>Cant.</label>
+                    <input name="LineItems[0].Quantity" type="number" min="1" value="1" class="form-control" required />
+                </div>
+                <div class="col-3">
+                    <label>Precio</label>
+                    <input name="LineItems[0].Price" type="number" step="0.01" class="form-control" required />
+                </div>
+                <div class="col-3">
+                    <label>Desc. % (línea)</label>
+                    <input name="LineItems[0].DiscountPercent" type="number" step="0.01"
+                           min="0" max="100" value="0" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="addLineItem()">Agregar Ítem</button>
+
+    <!-- ¿PAGADA? -->
+    <div class="form-group mt-3">
+        <label asp-for="IsPaid">¿Pagada?</label>
+        <select asp-for="IsPaid" class="form-control">
+            <option value="true">Sí</option>
+            <option value="false" selected>No</option>
+        </select>
+    </div>
+
+    <!-- PREVISUALIZACIÓN TOTAL -->
+    <div class="alert alert-info">
+        <strong id="totalPreview">Total estimado: $0.00</strong>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Crear</button>
+    <a asp-action="Index" class="btn btn-link">Volver a la lista</a>
+</form>
 
 @section Scripts {
+    <script>
+        let idx = 1;            // Siguiente índice de ítem
+
+        function addLineItem(){
+            const tpl = `
+            <div class="lineItem border p-2 mb-2 rounded">
+              <div class="form-row">
+                <div class="col">
+                  <label>Producto</label>
+                  <input name="LineItems[${idx}].ProductName" class="form-control" required />
+                </div>
+                <div class="col-2">
+                  <label>Cant.</label>
+                  <input name="LineItems[${idx}].Quantity" type="number" min="1" value="1" class="form-control" required />
+                </div>
+                <div class="col-3">
+                  <label>Precio</label>
+                  <input name="LineItems[${idx}].Price" type="number" step="0.01" class="form-control" required />
+                </div>
+                <div class="col-3">
+                  <label>Desc. % (línea)</label>
+                  <input name="LineItems[${idx}].DiscountPercent" type="number" step="0.01"
+                         min="0" max="100" value="0" class="form-control" />
+                </div>
+              </div>
+            </div>`;
+            document.getElementById('lineItemsContainer').insertAdjacentHTML('beforeend', tpl);
+            idx++;
+        }
+
+        // Actualiza total estimado al cambiar cualquier input
+        document.addEventListener('input', e=>{
+            if(e.target.closest('.lineItem') || e.target.name==='GlobalDiscountPercentage')
+                calcPreview();
+        });
+
+        function calcPreview(){
+            let total=0;
+            document.querySelectorAll('.lineItem').forEach(li=>{
+                const q = parseFloat(li.querySelector('[name$=".Quantity"]').value||0);
+                const p = parseFloat(li.querySelector('[name$=".Price"]').value||0);
+                const d = parseFloat(li.querySelector('[name$=".DiscountPercent"]').value||0);
+                total += q*p*(1-d/100);
+            });
+            const g = parseFloat(document.querySelector('[name="GlobalDiscountPercentage"]').value||0);
+            total *= (1-g/100);
+            document.getElementById('totalPreview').innerText = 'Total estimado: $'+total.toFixed(2);
+        }
+    </script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

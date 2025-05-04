@@ -1,21 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SistemaInventario.Data;
-// Asegúrate de tener esta using
 using Rotativa.AspNetCore;
 using OfficeOpenXml;
+using SistemaInventario.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// EPPlus 8: nueva forma de configurar la licencia
-
-
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllersWithViews();
 
+// 🔽 Aquí registramos el servicio de correo
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// También tu contexto de base de datos
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

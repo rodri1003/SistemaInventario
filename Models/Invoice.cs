@@ -13,25 +13,23 @@ namespace SistemaInventario.Models
         [Required]
         public DateTime Date { get; set; }
 
-        // Total de la venta sin descuento
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
 
-        // Ganancia neta calculada (puedes ajustar la fórmula)
+        [Column(TypeName = "decimal(18,2)")]
         public decimal NetProfit { get; set; }
 
-        // Descuento global en porcentaje (opcional, 0 a 100)
         [Range(0, 100)]
+        [Column(TypeName = "decimal(5,2)")]
         public decimal GlobalDiscountPercentage { get; set; }
 
         public bool IsPaid { get; set; }
 
-        // Relación: Cliente que realizó la compra
         [ForeignKey("Client")]
-        public int? ClientId { get; set; }  // ← Nullable
+        public int? ClientId { get; set; }
         public Client? Client { get; set; }
 
-        // Lista de ítems (detalles) de la factura
-        public List<InvoiceItem> LineItems { get; set; } = new List<InvoiceItem>();
+        public List<InvoiceItem> LineItems { get; set; } = new();
     }
 
     public class InvoiceItem
@@ -46,9 +44,17 @@ namespace SistemaInventario.Models
         public int Quantity { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "El precio debe ser positivo")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
-        // Propiedad para calcular el subtotal del ítem
+        [Range(0, 100)]
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? DiscountPercent { get; set; } = 0;
+
+        [NotMapped]
         public decimal Subtotal => Quantity * Price;
+
+        public int InvoiceId { get; set; }
+        public Invoice? Invoice { get; set; }
     }
 }

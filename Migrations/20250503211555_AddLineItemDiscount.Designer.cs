@@ -12,8 +12,8 @@ using SistemaInventario.Data;
 namespace SistemaInventario.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250406035419_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250503211555_AddLineItemDiscount")]
+    partial class AddLineItemDiscount
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -145,6 +145,9 @@ namespace SistemaInventario.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceItemId"));
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("InvoiceId")
                         .HasColumnType("int");

@@ -1,5 +1,27 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<h1>¡Bienvenido a la página principal!</h1>
+<style>
+    .full-screen-center {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #f8f9fa;
+        text-align: center;
+    }
+
+    .welcome-message {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+</style>
+
+<div class="full-screen-center">
+    <div class="welcome-message">¡Bienvenido al Sistema de Inventario!</div>
+    <img src="~/img/imagenEmprendimiento.png" alt="Imagen de emprendimiento" class="img-fluid rounded shadow" style="max-width: 90%; max-height: 70%;">
+</div>

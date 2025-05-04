@@ -63,15 +63,12 @@ namespace SistemaInventario.Data
                 .HasOne(i => i.Client)
                 .WithMany(c => c.Invoices)
                 .HasForeignKey(i => i.ClientId)
-                .OnDelete(DeleteBehavior.SetNull); // ← Deja el ClientId en null si se elimina el cliente
+                .OnDelete(DeleteBehavior.SetNull); 
 
             // Configurar decimales en Invoice
             modelBuilder.Entity<Invoice>().Property(i => i.TotalAmount).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Invoice>().Property(i => i.NetProfit).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Invoice>().Property(i => i.GlobalDiscountPercentage).HasColumnType("decimal(5,2)");
-
-            // 🔥 Evitar errores: eliminar datos seed que causan conflicto si ClientId no existe aún.
-            // Puedes agregar facturas después de crear un cliente en tiempo de ejecución
 
             // Configurar decimales en InvoiceItem
             modelBuilder.Entity<InvoiceItem>().Property(ii => ii.Price).HasColumnType("decimal(18,2)");
