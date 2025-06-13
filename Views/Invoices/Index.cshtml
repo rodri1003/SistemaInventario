@@ -1,13 +1,15 @@
 ﻿@model IEnumerable<SistemaInventario.Models.Invoice>
 
 @{
-    ViewData["Title"] = "Lista de Facturas"; 
+    ViewData["Title"] = "Lista de Facturas";
 }
 
 <h1>Lista de Facturas</h1>
 
 <p>
-    <a asp-action="Create">Crear Nuevo</a> 
+    <a asp-action="Create" class="btn btn-primary">Crear Nuevo</a>
+    <a asp-action="ReporteVentas" class="btn btn-danger">Generar Reporte PDF</a>
+    <a asp-action="ReportePorFecha" class="btn btn-warning">Reporte por Fechas</a> <!-- BOTÓN NUEVO PARA HU14 -->
 </p>
 
 <table class="table table-bordered">
@@ -18,24 +20,29 @@
             <th>Ganancia Neta</th>
             <th>Descuento Global (%)</th>
             <th>¿Pagado?</th>
-            <th></th> 
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                
                 <td>@item.Date.ToShortDateString()</td>
                 <td>@item.TotalAmount</td>
                 <td>@item.NetProfit</td>
                 <td>@item.GlobalDiscountPercentage</td>
                 <td>@(item.IsPaid ? "Sí" : "No")</td>
                 <td>
-                    
                     <a asp-action="Edit" asp-route-id="@item.InvoiceId">Editar</a> |
                     <a asp-action="Details" asp-route-id="@item.InvoiceId">Detalles</a> |
                     <a asp-action="Delete" asp-route-id="@item.InvoiceId">Eliminar</a>
+
+                    @if (!item.IsPaid)
+                    {
+                        <form asp-action="MarkAsPaid" asp-route-id="@item.InvoiceId" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmas marcar esta factura como pagada?');">Marcar como Pagada</button>
+                        </form>
+                    }
                 </td>
             </tr>
         }

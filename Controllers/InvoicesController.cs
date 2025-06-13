@@ -72,7 +72,6 @@ namespace SistemaInventario.Controllers
             _context.Add(invoice);
             await _context.SaveChangesAsync();
 
-            // Enviar correo con factura si el cliente tiene email
             var cliente = await _context.Clients.FirstOrDefaultAsync(c => c.ClientId == invoice.ClientId);
             if (cliente != null && !string.IsNullOrWhiteSpace(cliente.Email))
             {
@@ -172,6 +171,106 @@ namespace SistemaInventario.Controllers
             return File(pdf, "application/pdf", $"Factura_{invoice.InvoiceId}.pdf");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsPaid(int id)
+        {
+            var invoice = await _context.Invoices.FindAsync(id);
+            if (invoice == null)
+                return NotFound();
+
+            invoice.IsPaid = true;
+            _context.Update(invoice);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Factura #{id} marcada como pagada.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult ReporteVentas()
+        {
+            var facturas = _context.Invoices
+                .Include(i => i.Client)
+                .Where(i => i.IsPaid)
+                .OrderBy(i => i.Date)
+                .ToList();
+
+            var pdf = GenerateReporteVentasPdf(facturas);
+            return File(pdf, "application/pdf", "ReporteVentas.pdf");
+        }
+
+        private byte[] GenerateReporteVentasPdf(List<Invoice> facturas)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var doc = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(30);
+                    page.DefaultTextStyle(x => x.FontSize(9));
+
+                    page.Header().Text("Reporte de Ventas (Facturas Pagadas)")
+                                 .SemiBold().FontSize(18).FontColor(Colors.Red.Darken2);
+
+                    page.Content().Column(col =>
+                    {
+                        col.Spacing(5);
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(30);   // #
+                                columns.ConstantColumn(100);  // Fecha
+                                columns.RelativeColumn();     // Cliente
+                                columns.ConstantColumn(70);   // Total
+                                columns.ConstantColumn(70);   // Ganancia
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(CellStyle).Text("#");
+                                header.Cell().Element(CellStyle).Text("Fecha");
+                                header.Cell().Element(CellStyle).Text("Cliente");
+                                header.Cell().Element(CellStyle).Text("Total");
+                                header.Cell().Element(CellStyle).Text("Ganancia");
+
+                                static IContainer CellStyle(IContainer container) =>
+                                    container.Padding(5).Background("#EEE").Border(1).AlignCenter();
+                            });
+
+                            int index = 1;
+                            decimal total = 0, totalGanancia = 0;
+                            foreach (var f in facturas)
+                            {
+                                total += f.TotalAmount;
+                                totalGanancia += f.NetProfit;
+
+                                table.Cell().Element(CellData).Text(index++.ToString());
+                                table.Cell().Element(CellData).Text(f.Date.ToShortDateString());
+                                table.Cell().Element(CellData).Text(f.Client?.Name ?? "Sin cliente");
+                                table.Cell().Element(CellData).AlignRight().Text(f.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV")));
+                                table.Cell().Element(CellData).AlignRight().Text(f.NetProfit.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV")));
+                            }
+
+                            static IContainer CellData(IContainer container) =>
+                                container.Padding(3).BorderBottom(1).BorderColor("#DDD");
+                        });
+
+                        col.Item().Text(" ");
+                        col.Item().AlignRight().Text($"Total Facturado: {facturas.Sum(f => f.TotalAmount):C}", TextStyle.Default.SemiBold());
+                        col.Item().AlignRight().Text($"Total Ganado: {facturas.Sum(f => f.NetProfit):C}", TextStyle.Default.SemiBold());
+                    });
+
+                    page.Footer().AlignCenter().Text("Generado con QuestPDF - SistemaInventario");
+                });
+            });
+
+            return doc.GeneratePdf();
+        }
+
         private byte[] GenerateInvoicePdf(Invoice invoice)
         {
             QuestPDF.Settings.License = LicenseType.Community;
@@ -245,6 +344,36 @@ namespace SistemaInventario.Controllers
             });
 
             return doc.GeneratePdf();
+        }
+
+        public IActionResult ReportePorFecha()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ReportePorFecha(DateTime fechaInicio, DateTime fechaFin)
+        {
+            if (fechaInicio > fechaFin)
+            {
+                ModelState.AddModelError("", "La fecha de inicio no puede ser mayor que la fecha de fin.");
+                return View();
+            }
+
+            var facturas = _context.Invoices
+                .Include(i => i.Client)
+                .Where(i => i.Date.Date >= fechaInicio.Date && i.Date.Date <= fechaFin.Date)
+                .OrderBy(i => i.Date)
+                .ToList();
+
+            ViewBag.TotalVentas = facturas.Sum(f => f.TotalAmount);
+            ViewBag.TotalGanancias = facturas.Sum(f => f.NetProfit);
+            ViewBag.Facturas = facturas;
+            ViewBag.FechaInicio = fechaInicio.ToString("yyyy-MM-dd");
+            ViewBag.FechaFin = fechaFin.ToString("yyyy-MM-dd");
+
+            return View();
         }
 
         private bool InvoiceExists(int id) => _context.Invoices.Any(e => e.InvoiceId == id);

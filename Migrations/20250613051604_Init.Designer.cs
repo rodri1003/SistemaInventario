@@ -12,15 +12,15 @@ using SistemaInventario.Data;
 namespace SistemaInventario.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250503211555_AddLineItemDiscount")]
-    partial class AddLineItemDiscount
+    [Migration("20250613051604_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -146,10 +146,10 @@ namespace SistemaInventario.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceItemId"));
 
-                    b.Property<decimal>("DiscountPercent")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("DiscountPercent")
+                        .HasColumnType("decimal(5,2)");
 
-                    b.Property<int?>("InvoiceId")
+                    b.Property<int>("InvoiceId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
@@ -237,9 +237,13 @@ namespace SistemaInventario.Migrations
 
             modelBuilder.Entity("SistemaInventario.Models.InvoiceItem", b =>
                 {
-                    b.HasOne("SistemaInventario.Models.Invoice", null)
+                    b.HasOne("SistemaInventario.Models.Invoice", "Invoice")
                         .WithMany("LineItems")
-                        .HasForeignKey("InvoiceId");
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
                 });
 
             modelBuilder.Entity("SistemaInventario.Models.Product", b =>

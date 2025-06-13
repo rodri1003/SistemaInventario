@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Reporte por Rango de Fechas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Reporte de Facturas por Rango de Fechas</h2>
+
+<form asp-action="ReportePorFecha" method="post" class="mb-4">
+    <div class="form-group">
+        <label>Fecha Inicio:</label>
+        <input type="date" name="fechaInicio" value="@ViewBag.FechaInicio" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Fecha Fin:</label>
+        <input type="date" name="fechaFin" value="@ViewBag.FechaFin" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Generar Reporte</button>
+</form>
+
+@if (ViewBag.Facturas != null)
+{
+    var facturas = ViewBag.Facturas as List<SistemaInventario.Models.Invoice>;
+    <h4>Total de Ventas: @ViewBag.TotalVentas.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</h4>
+    <h4>Total de Ganancias: @ViewBag.TotalGanancias.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</h4>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th># Factura</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var factura in facturas)
+            {
+                <tr>
+                    <td>@factura.InvoiceId</td>
+                    <td>@(factura.Client?.Name ?? "Sin cliente")</td>
+                    <td>@factura.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
+                    <td>@factura.Date.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
