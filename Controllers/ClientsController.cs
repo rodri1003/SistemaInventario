@@ -16,14 +16,28 @@ namespace SistemaInventario.Controllers
             _context = context;
         }
 
-        // GET: Clients/Index - Lista de clientes
-        public async Task<IActionResult> Index()
+        // GET: Clients/Index - Lista de clientes con filtro de deuda
+        public async Task<IActionResult> Index(string estadoDeuda)
         {
-            var clients = await _context.Clients.ToListAsync();
+            var clientsQuery = _context.Clients.AsQueryable();
+
+            if (estadoDeuda == "deudores")
+            {
+                clientsQuery = clientsQuery.Where(c => c.OutstandingBalance > 0);
+            }
+            else if (estadoDeuda == "solventes")
+            {
+                clientsQuery = clientsQuery.Where(c => c.OutstandingBalance == 0);
+            }
+
+            var clients = await clientsQuery.ToListAsync();
+            ViewBag.EstadoDeuda = estadoDeuda;
+
             return View(clients);
         }
 
-        // GET: Clients/Details/5 - Detalles de un cliente
+
+        // GET: Clients/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -31,7 +45,6 @@ namespace SistemaInventario.Controllers
                 return NotFound();
             }
 
-            // Incluye las facturas asociadas para ver el historial de compras
             var client = await _context.Clients
                 .Include(c => c.Invoices)
                 .FirstOrDefaultAsync(c => c.ClientId == id);
@@ -44,13 +57,34 @@ namespace SistemaInventario.Controllers
             return View(client);
         }
 
-        // GET: Clients/Create - Formulario para crear un cliente
+        // POST: Clients/MarcarSolvente
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarcarSolvente(int id)
+        {
+            var client = await _context.Clients.FindAsync(id);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            client.OutstandingBalance = 0;
+            client.IsDebtor = false;
+
+            _context.Update(client);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Cliente marcado como solvente correctamente.";
+            return RedirectToAction(nameof(Details), new { id = client.ClientId });
+        }
+
+        // GET: Clients/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Clients/Create - Recibe los datos del formulario y crea el cliente
+        // POST: Clients/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Client client)
@@ -64,7 +98,7 @@ namespace SistemaInventario.Controllers
             return View(client);
         }
 
-        // GET: Clients/Edit/5 - Formulario para editar un cliente
+        // GET: Clients/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,7 +114,7 @@ namespace SistemaInventario.Controllers
             return View(client);
         }
 
-        // POST: Clients/Edit/5 - Recibe datos del formulario para actualizar el cliente
+        // POST: Clients/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Client client)
@@ -113,7 +147,7 @@ namespace SistemaInventario.Controllers
             return View(client);
         }
 
-        // GET: Clients/Delete/5 - Confirmación para eliminar un cliente
+        // GET: Clients/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,7 +164,7 @@ namespace SistemaInventario.Controllers
             return View(client);
         }
 
-        // POST: Clients/Delete/5 - Elimina el cliente
+        // POST: Clients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -141,7 +175,7 @@ namespace SistemaInventario.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Clients/History/5 - Muestra el historial de compras y estado de cuenta del cliente
+        // GET: Clients/History/5
         public async Task<IActionResult> History(int? id)
         {
             if (id == null)
@@ -149,7 +183,6 @@ namespace SistemaInventario.Controllers
                 return NotFound();
             }
 
-            // Incluye las facturas para mostrar el historial
             var client = await _context.Clients
                 .Include(c => c.Invoices)
                 .FirstOrDefaultAsync(c => c.ClientId == id);

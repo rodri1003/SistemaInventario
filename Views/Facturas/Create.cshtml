@@ -1,53 +1,67 @@
 ﻿@model SistemaInventario.Models.Invoice
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Factura";
 }
 
-<h1>Create</h1>
+<h1 class="mb-4">Crear Factura</h1>
 
-<h4>Invoice</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- Cliente -->
+            <div class="mb-3">
+                <label asp-for="ClientId" class="form-label">Cliente</label>
+                <select asp-for="ClientId" class="form-select" asp-items="ViewBag.Clientes">
+                    <option value="">-- Seleccionar --</option>
+                </select>
+                <span asp-validation-for="ClientId" class="text-danger"></span>
+            </div>
+
+            <!-- Fecha (solo si quieres permitir editarla; si no, quítala del formulario) -->
+            <div class="mb-3">
+                <label asp-for="Date" class="form-label"></label>
+                <input asp-for="Date" class="form-control" readonly />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TotalAmount" class="control-label"></label>
-                <input asp-for="TotalAmount" class="form-control" />
+
+            <!-- Total y Ganancia (readonly porque son calculados) -->
+            <div class="mb-3">
+                <label asp-for="TotalAmount" class="form-label"></label>
+                <input asp-for="TotalAmount" class="form-control" readonly />
                 <span asp-validation-for="TotalAmount" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="NetProfit" class="control-label"></label>
-                <input asp-for="NetProfit" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="NetProfit" class="form-label"></label>
+                <input asp-for="NetProfit" class="form-control" readonly />
                 <span asp-validation-for="NetProfit" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="GlobalDiscountPercentage" class="control-label"></label>
+
+            <!-- Descuento Global -->
+            <div class="mb-3">
+                <label asp-for="GlobalDiscountPercentage" class="form-label"></label>
                 <input asp-for="GlobalDiscountPercentage" class="form-control" />
                 <span asp-validation-for="GlobalDiscountPercentage" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsPaid" /> @Html.DisplayNameFor(model => model.IsPaid)
-                </label>
+
+            <!-- Estado de Pago -->
+            <div class="form-check mb-3">
+                <input class="form-check-input" asp-for="IsPaid" />
+                <label class="form-check-label" asp-for="IsPaid"></label>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <!-- Botones -->
+            <div class="d-flex gap-2">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

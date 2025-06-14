@@ -1,59 +1,77 @@
 ﻿@model IEnumerable<SistemaInventario.Models.Invoice>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Listado de Facturas";
+    string estado = ViewBag.EstadoPago as string ?? "";
 }
 
-<h1>Index</h1>
+<h1 class="mb-4">Listado de Facturas</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TotalAmount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NetProfit)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GlobalDiscountPercentage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsPaid)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TotalAmount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NetProfit)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GlobalDiscountPercentage)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsPaid)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.InvoiceId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.InvoiceId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.InvoiceId">Delete</a>
-            </td>
-        </tr>
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <div>
+        <a asp-action="Create" class="btn btn-primary">Crear Nueva Factura</a>
+        <a asp-action="ReporteVentas" asp-route-estadoPago="@estado" class="btn btn-outline-danger ms-2">Descargar PDF</a>
+    </div>
+
+    <form method="get" asp-action="Index" class="d-flex align-items-center">
+        <label class="me-2 mb-0">Estado de pago:</label>
+        <select name="estadoPago" class="form-select form-select-sm w-auto me-2">
+            <option value="">-- Todos --</option>
+            <option value="pagadas" selected="@(estado == "pagadas" ? "selected" : null)">Pagadas</option>
+            <option value="pendientes" selected="@(estado == "pendientes" ? "selected" : null)">Pendientes</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        No se encontraron facturas con los criterios seleccionados.
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Date)</th>
+                <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
+                <th>@Html.DisplayNameFor(model => model.NetProfit)</th>
+                <th>@Html.DisplayNameFor(model => model.GlobalDiscountPercentage)</th>
+                <th>@Html.DisplayNameFor(model => model.IsPaid)</th>
+                <th>Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var claseFila = item.IsPaid ? "" : "table-warning";
+
+                <tr class="@claseFila">
+                    <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                    <td>@item.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
+                    <td>@item.NetProfit.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
+                    <td>@item.GlobalDiscountPercentage %</td>
+                    <td>
+                        @if (item.IsPaid)
+                        {
+                            <span class="badge bg-success">Pagada</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Pendiente</span>
+                        }
+                    </td>
+                    <td>@item.Client?.Name</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.InvoiceId" asp-route-estadoPago="@estado">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@item.InvoiceId" asp-route-estadoPago="@estado">Detalles</a> |
+                        <a asp-action="Delete" asp-route-id="@item.InvoiceId" asp-route-estadoPago="@estado">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

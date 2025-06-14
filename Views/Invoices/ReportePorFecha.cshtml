@@ -3,28 +3,33 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Reporte de Facturas por Rango de Fechas</h2>
+<h2 class="mb-4">Reporte de Facturas por Rango de Fechas</h2>
 
-<form asp-action="ReportePorFecha" method="post" class="mb-4">
-    <div class="form-group">
-        <label>Fecha Inicio:</label>
-        <input type="date" name="fechaInicio" value="@ViewBag.FechaInicio" class="form-control" required />
+<form asp-action="ReportePorFecha" method="post" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label for="fechaInicio" class="form-label">Fecha Inicio:</label>
+        <input type="date" id="fechaInicio" name="fechaInicio" value="@ViewBag.FechaInicio" class="form-control" required />
     </div>
-    <div class="form-group">
-        <label>Fecha Fin:</label>
-        <input type="date" name="fechaFin" value="@ViewBag.FechaFin" class="form-control" required />
+    <div class="col-md-4">
+        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+        <input type="date" id="fechaFin" name="fechaFin" value="@ViewBag.FechaFin" class="form-control" required />
     </div>
-    <button type="submit" class="btn btn-primary mt-2">Generar Reporte</button>
+    <div class="col-md-4 align-self-end">
+        <button type="submit" class="btn btn-primary">Generar Reporte</button>
+    </div>
 </form>
 
 @if (ViewBag.Facturas != null)
 {
     var facturas = ViewBag.Facturas as List<SistemaInventario.Models.Invoice>;
-    <h4>Total de Ventas: @ViewBag.TotalVentas.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</h4>
-    <h4>Total de Ganancias: @ViewBag.TotalGanancias.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</h4>
 
-    <table class="table table-bordered mt-3">
-        <thead>
+    <div class="alert alert-info">
+        <strong>Total de Ventas:</strong> @ViewBag.TotalVentas.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))<br />
+        <strong>Total de Ganancias:</strong> @ViewBag.TotalGanancias.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
             <tr>
                 <th># Factura</th>
                 <th>Cliente</th>
@@ -39,7 +44,7 @@
                     <td>@factura.InvoiceId</td>
                     <td>@(factura.Client?.Name ?? "Sin cliente")</td>
                     <td>@factura.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
-                    <td>@factura.Date.ToShortDateString()</td>
+                    <td>@factura.Date.ToString("dd/MM/yyyy")</td>
                 </tr>
             }
         </tbody>

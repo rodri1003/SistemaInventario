@@ -2,49 +2,107 @@
 
 @{
     ViewData["Title"] = "Lista de Facturas";
+    string estado = ViewBag.EstadoPago as string ?? "";
 }
 
 <h1>Lista de Facturas</h1>
 
 <p>
     <a asp-action="Create" class="btn btn-primary">Crear Nuevo</a>
-    <a asp-action="ReporteVentas" class="btn btn-danger">Generar Reporte PDF</a>
-    <a asp-action="ReportePorFecha" class="btn btn-warning">Reporte por Fechas</a> <!-- BOTÓN NUEVO PARA HU14 -->
+    <a asp-action="ReporteVentas" asp-route-estadoPago="@estado" class="btn btn-danger">Generar Reporte PDF</a>
+    <a asp-action="ReportePorFecha" class="btn btn-warning">Reporte por Fechas</a>
 </p>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Ganancia Neta</th>
-            <th>Descuento Global (%)</th>
-            <th>¿Pagado?</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<form method="get" asp-action="Index" class="mb-3">
+    <label for="estadoPago">Filtrar por estado de pago:</label>
+    <select name="estadoPago" id="estadoPago" class="form-select d-inline-block w-auto mx-2">
+        @if (estado == "")
         {
-            <tr>
-                <td>@item.Date.ToShortDateString()</td>
-                <td>@item.TotalAmount</td>
-                <td>@item.NetProfit</td>
-                <td>@item.GlobalDiscountPercentage</td>
-                <td>@(item.IsPaid ? "Sí" : "No")</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.InvoiceId">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.InvoiceId">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.InvoiceId">Eliminar</a>
-
-                    @if (!item.IsPaid)
-                    {
-                        <form asp-action="MarkAsPaid" asp-route-id="@item.InvoiceId" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmas marcar esta factura como pagada?');">Marcar como Pagada</button>
-                        </form>
-                    }
-                </td>
-            </tr>
+            <option value="" selected>-- Todos --</option>
         }
-    </tbody>
-</table>
+        else
+        {
+            <option value="">-- Todos --</option>
+        }
+
+        @if (estado == "pagadas")
+        {
+            <option value="pagadas" selected>Pagadas</option>
+        }
+        else
+        {
+            <option value="pagadas">Pagadas</option>
+        }
+
+        @if (estado == "pendientes")
+        {
+            <option value="pendientes" selected>Pendientes</option>
+        }
+        else
+        {
+            <option value="pendientes">Pendientes</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+</form>
+
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        No se encontraron facturas con los criterios seleccionados.
+    </div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Ganancia Neta</th>
+                <th>Descuento Global (%)</th>
+                <th>¿Pagado?</th>
+                <th>Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var claseFila = item.IsPaid ? "" : "table-warning";
+
+                <tr class="@claseFila">
+                    <td>@item.InvoiceCode</td>
+                    <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                    <td>@item.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
+                    <td>@item.NetProfit.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
+                    <td>@item.GlobalDiscountPercentage</td>
+                    <td>
+                        @if (item.IsPaid)
+                        {
+                            <span class="text-success">Sí</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger">No</span>
+                        }
+                    </td>
+                    <td>@item.Client?.Name</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.InvoiceId" asp-route-estadoPago="@estado">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@item.InvoiceId" asp-route-estadoPago="@estado">Detalles</a> |
+                        <a asp-action="Delete" asp-route-id="@item.InvoiceId" asp-route-estadoPago="@estado">Eliminar</a>
+                        @if (!item.IsPaid)
+                        {
+                            <form asp-action="MarkAsPaid" asp-route-id="@item.InvoiceId" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('¿Confirmas marcar esta factura como pagada?');">Marcar como Pagada</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

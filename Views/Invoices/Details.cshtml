@@ -1,17 +1,22 @@
 ﻿@model SistemaInventario.Models.Invoice
+
 @{
-    ViewData["Title"] = $"Factura #{Model.InvoiceId}";
+    ViewData["Title"] = $"Factura #{Model.InvoiceId}";
+    string estado = ViewBag.EstadoPago as string ?? "";
 }
 
-<h1>Detalle de la Factura #@Model.InvoiceId</h1>
+<h1>Detalle de la Factura</h1>
 <hr />
 
 <!-- ─────────── Información general ─────────── -->
 <dl class="row">
-    <dt class="col-sm-3 font-weight-bold">Fecha</dt>
-    <dd class="col-sm-9">@Model.Date.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-3 fw-bold">Código</dt>
+    <dd class="col-sm-9 text-monospace">@Model.InvoiceCode</dd>
 
-    <dt class="col-sm-3 font-weight-bold">Cliente</dt>
+    <dt class="col-sm-3 fw-bold">Fecha</dt>
+    <dd class="col-sm-9">@Model.Date.ToString("dd/MM/yyyy HH:mm")</dd>
+
+    <dt class="col-sm-3 fw-bold">Cliente</dt>
     <dd class="col-sm-9">
         @if (Model.Client is null)
         {
@@ -23,21 +28,30 @@
         }
     </dd>
 
-    <dt class="col-sm-3 font-weight-bold">Pagada</dt>
-    <dd class="col-sm-9">@((Model.IsPaid) ? "Sí" : "No")</dd>
+    <dt class="col-sm-3 fw-bold">Estado de Pago</dt>
+    <dd class="col-sm-9">
+        @if (Model.IsPaid)
+        {
+            <span class="text-success fw-semibold">Pagada</span>
+        }
+        else
+        {
+            <span class="text-danger fw-semibold">Pendiente</span>
+        }
+    </dd>
 </dl>
 
 <!-- ─────────── Ítems ─────────── -->
-<h4>Productos</h4>
+<h4 class="mt-4">Productos</h4>
 <table class="table table-bordered table-sm">
-    <thead class="thead-light">
+    <thead class="table-light">
         <tr>
             <th>#</th>
             <th>Producto</th>
             <th class="text-center">Cantidad</th>
-            <th class="text-right">Precio u.</th>
-            <th class="text-right">Desc.%</th>
-            <th class="text-right">Subtotal</th>
+            <th class="text-end">Precio u.</th>
+            <th class="text-end">Desc.%</th>
+            <th class="text-end">Subtotal</th>
         </tr>
     </thead>
     <tbody>
@@ -53,38 +67,40 @@
                 <td>@n</td>
                 <td>@item.ProductName</td>
                 <td class="text-center">@item.Quantity</td>
-                <td class="text-right">@item.Price.ToString("0.00")</td>
-                <td class="text-right">@((item.DiscountPercent ?? 0).ToString("0.##"))</td>
-                <td class="text-right">@sub.ToString("0.00")</td>
+                <td class="text-end">@item.Price.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
+                <td class="text-end">@((item.DiscountPercent ?? 0).ToString("0.##")) %</td>
+                <td class="text-end">@sub.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
             </tr>
             n++;
         }
     </tbody>
     <tfoot>
-        <tr class="font-weight-bold">
-            <td colspan="5" class="text-right">Subtotal (con descuentos de línea)</td>
-            <td class="text-right">@subtotalLineas.ToString("0.00")</td>
+        <tr class="fw-bold">
+            <td colspan="5" class="text-end">Subtotal (con descuentos de línea)</td>
+            <td class="text-end">@subtotalLineas.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
         </tr>
-        <tr class="font-weight-bold">
-            <td colspan="5" class="text-right">
-                Descuento global (@Model.GlobalDiscountPercentage %)
+        <tr class="fw-bold">
+            <td colspan="5" class="text-end">
+                Descuento global (@Model.GlobalDiscountPercentage %)
             </td>
-            <td class="text-right">
-                @((subtotalLineas * Model.GlobalDiscountPercentage / 100m).ToString("0.00"))
+            <td class="text-end">
+                @((subtotalLineas * Model.GlobalDiscountPercentage / 100m).ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV")))
             </td>
         </tr>
-        <tr class="font-weight-bold bg-light">
-            <td colspan="5" class="text-right">TOTAL A PAGAR</td>
-            <td class="text-right">@Model.TotalAmount.ToString("0.00")</td>
+        <tr class="fw-bold table-light">
+            <td colspan="5" class="text-end">TOTAL A PAGAR</td>
+            <td class="text-end">@Model.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
         </tr>
         <tr>
-            <td colspan="5" class="text-right">Ganancia neta&nbsp;(≈ 30 %)</td>
-            <td class="text-right">@Model.NetProfit.ToString("0.00")</td>
+            <td colspan="5" class="text-end">Ganancia neta (≈ 30%)</td>
+            <td class="text-end">@Model.NetProfit.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</td>
         </tr>
     </tfoot>
 </table>
 
 <!-- ─────────── Acciones ─────────── -->
-<a asp-action="ExportPdf" asp-route-id="@Model.InvoiceId" class="btn btn-outline-danger btn-sm">Descargar PDF</a>
-<a asp-action="Edit" asp-route-id="@Model.InvoiceId" class="btn btn-primary btn-sm">Editar</a>
-<a asp-action="Index" class="btn btn-secondary btn-sm">Volver a la lista</a>
+<div class="mt-3">
+    <a asp-action="ExportPdf" asp-route-id="@Model.InvoiceId" class="btn btn-outline-danger btn-sm">Descargar PDF</a>
+    <a asp-action="Edit" asp-route-id="@Model.InvoiceId" asp-route-estadoPago="@estado" class="btn btn-primary btn-sm">Editar</a>
+    <a asp-action="Index" asp-route-estadoPago="@estado" class="btn btn-secondary btn-sm">Volver a la lista</a>
+</div>

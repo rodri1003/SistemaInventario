@@ -44,6 +44,13 @@
         <span asp-validation-for="Notes" class="text-danger"></span>
     </div>
 
+    <!-- Deuda Pendiente -->
+    <div class="form-group">
+        <label asp-for="OutstandingBalance" class="control-label">Deuda Pendiente ($)</label>
+        <input asp-for="OutstandingBalance" class="form-control" />
+        <span asp-validation-for="OutstandingBalance" class="text-danger"></span>
+    </div>
+
     <input type="submit" value="Crear" class="btn btn-primary" />
 </form>
 

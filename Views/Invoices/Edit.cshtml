@@ -2,61 +2,100 @@
 
 @{
     ViewData["Title"] = "Editar Factura";
+    string estado = ViewBag.EstadoPago as string ?? "";
 }
 
 <h1>Editar Factura</h1>
 
-<h4>Factura</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
+    <div class="col-md-8">
+        <form asp-action="Edit" asp-route-estadoPago="@estado">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="InvoiceId" />
 
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
+            <!-- Código Único (solo lectura) -->
+            <div class="form-group mb-3">
+                <label asp-for="InvoiceCode" class="form-label">Código de Factura</label>
+                <input asp-for="InvoiceCode" class="form-control" readonly />
             </div>
 
-            <div class="form-group">
-                <label asp-for="TotalAmount" class="control-label"></label>
-                <input asp-for="TotalAmount" class="form-control" />
-                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+            <!-- Cliente -->
+            <div class="form-group mb-3">
+                <label class="control-label">Cliente</label>
+                <select asp-for="ClientId" class="form-select" asp-items="ViewBag.Clientes"></select>
+                <span asp-validation-for="ClientId" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="NetProfit" class="control-label"></label>
-                <input asp-for="NetProfit" class="form-control" />
-                <span asp-validation-for="NetProfit" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="GlobalDiscountPercentage" class="control-label"></label>
+            <!-- Descuento -->
+            <div class="form-group mb-3">
+                <label asp-for="GlobalDiscountPercentage" class="control-label">Descuento Global (%)</label>
                 <input asp-for="GlobalDiscountPercentage" class="form-control" />
                 <span asp-validation-for="GlobalDiscountPercentage" class="text-danger"></span>
             </div>
 
-            <!-- Dropdown para seleccionar si la factura está pagada -->
-            <div class="form-group">
-                <label asp-for="IsPaid" class="control-label"></label>
-                <select asp-for="IsPaid" class="form-control">
-                    <option value="true">Sí</option>
-                    <option value="false">No</option>
+            <!-- Pagada -->
+            <div class="form-group mb-3">
+                <label asp-for="IsPaid" class="control-label">¿Pagada?</label>
+                <select asp-for="IsPaid" class="form-select">
+                    <option value="true" selected="@Model.IsPaid">Sí</option>
+                    <option value="false" selected="@(!Model.IsPaid)">No</option>
                 </select>
                 <span asp-validation-for="IsPaid" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
+            <!-- Ítems de la factura (solo lectura pero envía al backend) -->
+            <h4 class="mt-4">Ítems de la Factura</h4>
+            @if (Model.LineItems != null && Model.LineItems.Count > 0)
+            {
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-end">Precio</th>
+                            <th class="text-end">Descuento %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.LineItems.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>
+                                    <input type="hidden" name="LineItems[@i].ProductName" value="@Model.LineItems[i].ProductName" />
+                                    @Model.LineItems[i].ProductName
+                                </td>
+                                <td class="text-center">
+                                    <input type="hidden" name="LineItems[@i].Quantity" value="@Model.LineItems[i].Quantity" />
+                                    @Model.LineItems[i].Quantity
+                                </td>
+                                <td class="text-end">
+                                    <input type="hidden" name="LineItems[@i].Price" value="@Model.LineItems[i].Price" />
+                                    @Model.LineItems[i].Price.ToString("0.00")
+                                </td>
+                                <td class="text-end">
+                                    <input type="hidden" name="LineItems[@i].DiscountPercent" value="@Model.LineItems[i].DiscountPercent" />
+                                    @(Model.LineItems[i].DiscountPercent ?? 0)%
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-warning">Esta factura no tiene ítems.</div>
+            }
+
+            <!-- Botones -->
+            <div class="form-group mt-4">
+                <input type="submit" value="Guardar Cambios" class="btn btn-primary" />
+                <a asp-action="Index" asp-route-estadoPago="@estado" class="btn btn-secondary ms-2">Cancelar</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Volver a la Lista</a>
 </div>
 
 @section Scripts {

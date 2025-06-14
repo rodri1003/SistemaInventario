@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SistemaInventario.Models
 {
@@ -9,6 +11,11 @@ namespace SistemaInventario.Models
     {
         [Key]
         public int InvoiceId { get; set; }
+
+        [BindNever]
+        [Required]
+        [StringLength(20)]
+        public string InvoiceCode { get; set; } = string.Empty;
 
         [Required]
         public DateTime Date { get; set; }

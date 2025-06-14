@@ -2,40 +2,98 @@
 
 @{
     ViewData["Title"] = "Clientes";
+    string estado = ViewBag.EstadoDeuda as string ?? "";
 }
 
 <h1>Información de Clientes</h1>
 
 <p>
-    <a asp-action="Create">Crear Nuevo</a>
+    <a asp-action="Create" class="btn btn-primary btn-sm">Crear Nuevo</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Name)</th>
-            <th>@Html.DisplayNameFor(model => model.Email)</th>
-            <th>@Html.DisplayNameFor(model => model.Phone)</th>
-            <th>@Html.DisplayNameFor(model => model.Address)</th>
-            <th>@Html.DisplayNameFor(model => model.Notes)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+
+<form method="get" asp-action="Index" class="mb-3">
+    <label for="estadoDeuda">Filtrar por estado:</label>
+    <select name="estadoDeuda" id="estadoDeuda" class="form-select d-inline-block w-auto mx-2">
+        @if (estado == "")
         {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
-                <td>@Html.DisplayFor(modelItem => item.Address)</td>
-                <td>@Html.DisplayFor(modelItem => item.Notes)</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.ClientId">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.ClientId">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ClientId">Eliminar</a> |
-                    <a asp-action="History" asp-route-id="@item.ClientId">Historial</a>
-                </td>
-            </tr>
+            <option value="" selected>-- Todos --</option>
         }
-    </tbody>
-</table>
+        else
+        {
+            <option value="">-- Todos --</option>
+        }
+
+        @if (estado == "deudores")
+        {
+            <option value="deudores" selected>Deudores</option>
+        }
+        else
+        {
+            <option value="deudores">Deudores</option>
+        }
+
+        @if (estado == "solventes")
+        {
+            <option value="solventes" selected>Solventes</option>
+        }
+        else
+        {
+            <option value="solventes">Solventes</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        No se encontraron clientes con los criterios seleccionados.
+    </div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Name)</th>
+                <th>@Html.DisplayNameFor(model => model.Email)</th>
+                <th>@Html.DisplayNameFor(model => model.Phone)</th>
+                <th>@Html.DisplayNameFor(model => model.Address)</th>
+                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                bool esDeudor = item.OutstandingBalance > 0;
+                string filaClase = esDeudor ? "table-danger" : "";
+
+                <tr class="@filaClase">
+                    <td>@item.Name</td>
+                    <td>@item.Email</td>
+                    <td>@item.Phone</td>
+                    <td>@item.Address</td>
+                    <td>@item.Notes</td>
+                    <td>
+                        @if (esDeudor)
+                        {
+                            <span class="text-danger">Deudor: @item.OutstandingBalance.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("es-SV"))</span>
+                        }
+                        else
+                        {
+                            <span class="text-success">Solvente</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ClientId">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@item.ClientId">Detalles</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ClientId">Eliminar</a> |
+                        <a asp-action="History" asp-route-id="@item.ClientId">Historial</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
